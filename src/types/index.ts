@@ -36,6 +36,7 @@ export interface Product {
     category_id?: number;   // ID danh mục sản phẩm
     unit_id?: number;       // ID đơn vị tính
     description: string;    // Mô tả chi tiết sản phẩm
+    operation_type: string; // Loại sản phẩm: MANUFACTURING hoặc PACKAGING
 }
 
 export interface CreateProductRequest {
@@ -44,6 +45,7 @@ export interface CreateProductRequest {
     category_id?: number;
     unit_id?: number;
     description: string;
+    operation_type: string; // Loại sản phẩm: MANUFACTURING hoặc PACKAGING
 }
 
 export interface UpdateProductRequest {
@@ -53,6 +55,7 @@ export interface UpdateProductRequest {
     category_id?: number;
     unit_id?: number;
     description: string;
+    operation_type: string; // Loại sản phẩm: MANUFACTURING hoặc PACKAGING
 }
 
 export interface InventoryInfo {
@@ -92,6 +95,7 @@ export interface ProductResponse {
     category_id?: number;
     unit_id?: number;
     description: string;
+    operation_type: string; // Loại sản phẩm: MANUFACTURING hoặc PACKAGING
     category?: ProductCategoryResponse;
     unit?: UnitOfMeasureResponse;
     inventory?: InventoryInfo;
@@ -170,8 +174,6 @@ export interface OrderItem {
     id: number;
     order_id: number;
     product_id: number;
-    number_of_boxes?: number;
-    spec?: number;
     quantity: number;
     selling_price: number;
     discount: number;
@@ -191,8 +193,6 @@ export interface CreateOrderRequest {
 
 export interface OrderItemRequest {
     product_id: number;
-    number_of_boxes?: number;
-    spec?: number;
     quantity: number;
     selling_price: number;
     discount?: number;
@@ -235,8 +235,6 @@ export interface OrderItemResponse {
     order_id: number;
     product_id: number;
     product_name?: string;
-    number_of_boxes?: number;
-    spec?: number;
     quantity: number;
     selling_price: number;
     discount: number;
@@ -327,7 +325,6 @@ export interface InventoryResponse {
 export interface ProductInfo {
     id: number;
     name: string;
-    spec: number;
     original_price: number;
 }
 

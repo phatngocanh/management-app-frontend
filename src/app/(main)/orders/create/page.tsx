@@ -48,8 +48,6 @@ interface OrderFormData {
 
 interface OrderItemFormData {
     product_id: number;
-    number_of_boxes?: number;
-    spec?: number;
     quantity: number;
     selling_price: number;
     discount: number;
@@ -245,8 +243,6 @@ export default function CreateOrderPage() {
                 const inventory = getInventoryForProduct(value);
                 item = {
                     product_id: value,
-                    number_of_boxes: undefined,
-                    spec: undefined,
                     quantity: 0,
                     selling_price: 0,
                     discount: 0,
@@ -254,34 +250,6 @@ export default function CreateOrderPage() {
                     version: inventory ? inventory.version : '',
                     export_from: '',
                 };
-            }
-
-            // Handle spec, boxes, and quantity logic
-            if (field === 'number_of_boxes' || field === 'spec') {
-                // If both number_of_boxes and spec are provided, calculate quantity
-                if (item.number_of_boxes && item.spec) {
-                    item.quantity = item.number_of_boxes * item.spec;
-                } else if (field === 'number_of_boxes' && item.number_of_boxes && !item.spec) {
-                    // If only number_of_boxes is provided, auto-fill with product's default spec
-                    const product = getProductById(item.product_id);
-                    if (product && product.spec) {
-                        item.spec = product.spec;
-                        item.quantity = item.number_of_boxes * product.spec;
-                    }
-                } else if (field === 'spec' && item.spec && !item.number_of_boxes) {
-                    // If only spec is provided, clear quantity (user needs to enter boxes or quantity manually)
-                    item.quantity = 0;
-                } else if ((field === 'number_of_boxes' && !item.number_of_boxes) || 
-                          (field === 'spec' && !item.spec)) {
-                    // If either field is cleared, clear quantity
-                    item.quantity = 0;
-                }
-            }
-
-            // If quantity is explicitly set, clear both number_of_boxes and spec
-            if (field === 'quantity') {
-                item.number_of_boxes = undefined;
-                item.spec = undefined;
             }
 
             // Calculate final_amount whenever quantity, selling_price, or discount changes
@@ -310,15 +278,7 @@ export default function CreateOrderPage() {
         return null;
     };
 
-    const isSpecDisabled = (item: OrderItemFormData) => {
-        // Spec is disabled if quantity was manually entered (not calculated from number_of_boxes × spec)
-        return !!(item.quantity > 0 && !item.number_of_boxes && !item.spec);
-    };
 
-    const isBoxesDisabled = (item: OrderItemFormData) => {
-        // Boxes is disabled if quantity was manually entered (not calculated from number_of_boxes × spec)
-        return !!(item.quantity > 0 && !item.number_of_boxes && !item.spec);
-    };
 
     const hasProductFromSource = (productId: number, exportFrom: string, currentIndex: number) => {
         if (!exportFrom) return false; // Don't disable if no source selected yet
@@ -339,7 +299,7 @@ export default function CreateOrderPage() {
         return formData.order_items.reduce((total, item) => {
             const product = getProductById(item.product_id);
             if (product && item.quantity > 0 && item.selling_price > 0) {
-                const originalCost = item.quantity * product.original_price;
+                const originalCost = item.quantity * product.cost;
                 const sellingRevenue = item.quantity * item.selling_price;
                 const discountAmount = (sellingRevenue * item.discount) / 100;
                 const finalRevenue = sellingRevenue - discountAmount;
@@ -354,7 +314,7 @@ export default function CreateOrderPage() {
         const totalOriginalCost = formData.order_items.reduce((total, item) => {
             const product = getProductById(item.product_id);
             if (product && item.quantity > 0) {
-                return total + (item.quantity * product.original_price);
+                return total + (item.quantity * product.cost);
             }
             return total;
         }, 0);
@@ -414,8 +374,6 @@ export default function CreateOrderPage() {
                 additional_cost_note: formData.additional_cost_note || "",
                 order_items: formData.order_items.map(item => ({
                     product_id: item.product_id,
-                    number_of_boxes: item.number_of_boxes,
-                    spec: item.spec,
                     quantity: item.quantity,
                     selling_price: item.selling_price,
                     discount: item.discount,
@@ -627,7 +585,7 @@ export default function CreateOrderPage() {
                                     const discountAmount = (originalPrice * (item.discount || 0)) / 100;
                                     
                                     // Calculate profit/loss
-                                    const originalCost = product ? item.quantity * product.original_price : 0;
+                                    const originalCost = product ? item.quantity * product.cost : 0;
                                     const sellingRevenue = item.quantity * item.selling_price;
                                     const finalRevenue = sellingRevenue - discountAmount;
                                     const profitLoss = finalRevenue - originalCost;
@@ -655,47 +613,7 @@ export default function CreateOrderPage() {
                                                 </Grid>
                                                 <Grid item xs={12} md={1.5}>
                                                     <Tooltip
-                                                        title={isBoxesDisabled(item) ? "Số thùng bị khóa vì số lượng đã được nhập trực tiếp" : "Nhập số thùng để tính số lượng tự động"}
-                                                        arrow
-                                                        placement="top"
-                                                    >
-                                                        <TextField
-                                                            fullWidth
-                                                            type="text"
-                                                            label="Số thùng"
-                                                            value={item.number_of_boxes !== undefined && item.number_of_boxes !== null && !isNaN(item.number_of_boxes) ? item.number_of_boxes.toLocaleString("vi-VN") : ""}
-                                                            onChange={(e) => {
-                                                                const raw = e.target.value.replace(/\D/g, "");
-                                                                updateOrderItem(index, "number_of_boxes", raw ? parseInt(raw) : undefined);
-                                                            }}
-                                                            placeholder="Tùy chọn"
-                                                            disabled={item.product_id === 0 || isBoxesDisabled(item)}
-                                                        />
-                                                    </Tooltip>
-                                                </Grid>
-                                                <Grid item xs={12} md={1.5}>
-                                                    <Tooltip
-                                                        title={isSpecDisabled(item) ? "Quy cách bị khóa vì số lượng đã được nhập trực tiếp" : "Nhập quy cách mỗi thùng để tính số lượng tự động"}
-                                                        arrow
-                                                        placement="top"
-                                                    >
-                                                        <TextField
-                                                            fullWidth
-                                                            type="text"
-                                                            label="Quy cách"
-                                                            value={item.spec !== undefined && item.spec !== null && !isNaN(item.spec) ? item.spec.toLocaleString("vi-VN") : ""}
-                                                            onChange={(e) => {
-                                                                const raw = e.target.value.replace(/\D/g, "");
-                                                                updateOrderItem(index, "spec", raw ? parseInt(raw) : undefined);
-                                                            }}
-                                                            placeholder="Tùy chọn"
-                                                            disabled={item.product_id === 0 || isSpecDisabled(item)}
-                                                        />
-                                                    </Tooltip>
-                                                </Grid>
-                                                <Grid item xs={12} md={1.5}>
-                                                    <Tooltip
-                                                        title="Nhập số lượng trực tiếp hoặc sử dụng số thùng × quy cách"
+                                                        title="Nhập số lượng trực tiếp"
                                                         arrow
                                                         placement="top"
                                                     >
@@ -716,8 +634,8 @@ export default function CreateOrderPage() {
                                                 <Grid item xs={12} md={1.5}>
                                                     <Tooltip
                                                         title={
-                                                            product && item.selling_price > 0 && product.original_price > 0
-                                                                ? `Giá gốc: ${product.original_price.toLocaleString('vi-VN')} VND\nChênh lệch: ${(item.selling_price - product.original_price).toLocaleString('vi-VN')} VND\nBiên lợi nhuận: ${(((item.selling_price - product.original_price) / product.original_price) * 100).toFixed(1)}%`
+                                                            product && item.selling_price > 0 && product.cost > 0
+                                                                ? `Giá gốc: ${product.cost.toLocaleString('vi-VN')} VND\nChênh lệch: ${(item.selling_price - product.cost).toLocaleString('vi-VN')} VND\nBiên lợi nhuận: ${(((item.selling_price - product.cost) / product.cost) * 100).toFixed(1)}%`
                                                                 : ""
                                                         }
                                                         arrow
@@ -827,7 +745,7 @@ export default function CreateOrderPage() {
                                             {/* Info bar below the row */}
                                             {product && (
                                               <Box sx={{ mt: 1, fontSize: 15, color: profitLoss >= 0 ? '#059669' : '#dc2626', fontWeight: 600 }}>
-                                                {`Giá vốn ${product.original_price.toLocaleString('vi-VN')}đ × ${item.quantity} = ${originalCost.toLocaleString('vi-VN')}, bán ${item.selling_price.toLocaleString('vi-VN')}đ × ${item.quantity} = ${(item.selling_price * item.quantity).toLocaleString('vi-VN')}` +
+                                                {`Giá vốn ${product.cost.toLocaleString('vi-VN')}đ × ${item.quantity} = ${originalCost.toLocaleString('vi-VN')}, bán ${item.selling_price.toLocaleString('vi-VN')}đ × ${item.quantity} = ${(item.selling_price * item.quantity).toLocaleString('vi-VN')}` +
                                                   (item.discount > 0 ? `, chiết khấu ${item.discount}% (${discountAmount.toLocaleString('vi-VN')}đ) = còn ${(item.selling_price * item.quantity - discountAmount).toLocaleString('vi-VN')}` : '') +
                                                   ` → ${profitLoss >= 0 ? 'Lãi' : 'Lỗ'} ${Math.abs(profitLoss).toLocaleString('vi-VN')}đ (${profitLossPercentage >= 0 ? '+' : ''}${profitLossPercentage.toFixed(1)}%)`
                                                 }

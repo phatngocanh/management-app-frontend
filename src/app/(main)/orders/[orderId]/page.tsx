@@ -546,8 +546,7 @@ export default function OrderDetailPage() {
                                         <TableRow>
                                             <TableCell>ID</TableCell>
                                             <TableCell>Sản phẩm</TableCell>
-                                            <TableCell>Số thùng</TableCell>
-                                            <TableCell>Quy cách</TableCell>
+                                            
                                             <TableCell>Số lượng</TableCell>
                                             <TableCell>Giá bán</TableCell>
                                             <TableCell>Chiết khấu</TableCell>
@@ -563,8 +562,8 @@ export default function OrderDetailPage() {
                                                 <TableRow>
                                                     <TableCell sx={{ borderBottom: 'none' }}>{item.id}</TableCell>
                                                     <TableCell sx={{ borderBottom: 'none' }}>{item.product_name || item.product_id}</TableCell>
-                                                    <TableCell sx={{ borderBottom: 'none' }}>{item.number_of_boxes || "-"}</TableCell>
-                                                    <TableCell sx={{ borderBottom: 'none' }}>{item.spec || "-"}</TableCell>
+                                                    
+                    
                                                     <TableCell sx={{ borderBottom: 'none' }}>{item.quantity}</TableCell>
                                                     <TableCell sx={{ borderBottom: 'none' }}>{item.selling_price.toLocaleString("vi-VN")} VND</TableCell>
                                                     <TableCell sx={{ borderBottom: 'none' }}>{item.discount}%</TableCell>

@@ -2,10 +2,10 @@ import { api } from "@/lib/axios";
 import {
     ApiResponse,
     CreateProductCategoryRequest,
-    UpdateProductCategoryRequest,
     GetAllProductCategoriesResponse,
     GetOneProductCategoryResponse,
     ProductCategoryResponse,
+    UpdateProductCategoryRequest,
 } from "@/types";
 
 // Category API functions

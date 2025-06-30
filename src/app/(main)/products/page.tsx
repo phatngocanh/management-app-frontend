@@ -22,7 +22,11 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    FormControl,
     IconButton,
+    InputLabel,
+    MenuItem,
+    Select,
     Table,
     TableBody,
     TableCell,
@@ -54,12 +58,14 @@ export default function ProductsPage() {
         description: string;
         category_id?: number;
         unit_id?: number;
+        operation_type: string;
     }>({
         name: "",
         cost: 0,
         description: "",
         category_id: undefined,
         unit_id: undefined,
+        operation_type: "MANUFACTURING",
     });
 
     // Form data for inventory update
@@ -138,6 +144,7 @@ export default function ProductsPage() {
                     description: formData.description || "",
                     category_id: formData.category_id,
                     unit_id: formData.unit_id,
+                    operation_type: formData.operation_type,
                 };
                 await productApi.update(updateData);
             } else {
@@ -147,6 +154,7 @@ export default function ProductsPage() {
                     description: formData.description || "",
                     category_id: formData.category_id,
                     unit_id: formData.unit_id,
+                    operation_type: formData.operation_type,
                 };
                 await productApi.create(createData);
             }
@@ -160,6 +168,7 @@ export default function ProductsPage() {
                 description: "",
                 category_id: undefined,
                 unit_id: undefined,
+                operation_type: "MANUFACTURING",
             });
             await loadData();
         } catch (err: any) {
@@ -208,6 +217,7 @@ export default function ProductsPage() {
             description: product.description,
             category_id: product.category_id,
             unit_id: product.unit_id,
+            operation_type: product.operation_type,
         });
         setOpenDialog(true);
     };
@@ -233,6 +243,7 @@ export default function ProductsPage() {
             description: "",
             category_id: undefined,
             unit_id: undefined,
+            operation_type: "MANUFACTURING",
         });
         setError(null);
     };
@@ -347,6 +358,7 @@ export default function ProductsPage() {
                                     <TableCell>ID</TableCell>
                                     <TableCell>Tên sản phẩm</TableCell>
                                     <TableCell>Giá vốn</TableCell>
+                                    <TableCell>Loại sản phẩm</TableCell>
                                     <TableCell>Danh mục</TableCell>
                                     <TableCell>Đơn vị</TableCell>
                                     <TableCell>Số lượng kho</TableCell>
@@ -370,6 +382,10 @@ export default function ProductsPage() {
                                             </Box>
                                         </TableCell>
                                         <TableCell>{formatPrice(product.cost)}</TableCell>
+                                        <TableCell>
+                                            {product.operation_type === "MANUFACTURING" ? "Sản xuất" : 
+                                             product.operation_type === "PACKAGING" ? "Đóng gói" : "Mua nguyên liệu"}
+                                        </TableCell>
                                         <TableCell>
                                             {product.category ? product.category.name : "N/A"}
                                         </TableCell>
@@ -490,6 +506,19 @@ export default function ProductsPage() {
                             )}
                             disabled={submitting}
                         />
+                        <FormControl fullWidth margin="normal" disabled={submitting}>
+                            <InputLabel>Loại sản phẩm</InputLabel>
+                            <Select
+                                value={formData.operation_type}
+                                onChange={(e) => setFormData({ ...formData, operation_type: e.target.value })}
+                                label="Loại sản phẩm"
+                                required
+                            >
+                                <MenuItem value="MANUFACTURING">Sản xuất (Manufacturing)</MenuItem>
+                                <MenuItem value="PACKAGING">Đóng gói (Packaging)</MenuItem>
+                                <MenuItem value="PURCHASE">Mua nguyên liệu (Purchase)</MenuItem>
+                            </Select>
+                        </FormControl>
                         <TextField
                             fullWidth
                             label="Mô tả"

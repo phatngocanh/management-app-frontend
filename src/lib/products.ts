@@ -1,20 +1,20 @@
 import { api } from "@/lib/axios";
 import {
     ApiResponse,
+    CreateProductBomRequest,
     CreateProductRequest,
     GetAllInventoryHistoriesResponse,
+    GetAllProductBomsResponse,
     GetAllProductsResponse,
+    GetOneProductBomResponse,
     GetOneProductResponse,
     InventoryHistoryResponse,
     InventoryResponse,
+    ProductBomResponse,
     ProductResponse,
     UpdateInventoryQuantityRequest,
-    UpdateProductRequest,
-    CreateProductBomRequest,
     UpdateProductBomRequest,
-    GetAllProductBomsResponse,
-    GetOneProductBomResponse,
-    ProductBomResponse,
+    UpdateProductRequest,
 } from "@/types";
 
 // Product API functions
