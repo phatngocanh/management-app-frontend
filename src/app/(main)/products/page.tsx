@@ -393,16 +393,22 @@ export default function ProductsPage() {
                                             {product.unit ? product.unit.name : "N/A"}
                                         </TableCell>
                                         <TableCell>
-                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                <Typography variant="body2">
-                                                    {product.inventory ? product.inventory.quantity : "N/A"}
-                                                </Typography>
-                                                {product.unit && product.inventory && (
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {product.unit.name}
+                                            {product.operation_type === "PURCHASE" ? (
+                                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                    <Typography variant="body2">
+                                                        {product.inventory ? product.inventory.quantity : "N/A"}
                                                     </Typography>
-                                                )}
-                                            </Box>
+                                                    {product.unit && product.inventory && (
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {product.unit.name}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+                                                    Không áp dụng
+                                                </Typography>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <Tooltip title="Chỉnh sửa Sản phẩm">
@@ -413,22 +419,26 @@ export default function ProductsPage() {
                                                     <EditIcon />
                                                 </IconButton>
                                             </Tooltip>
-                                            <Tooltip title="Cập nhật số lượng kho">
-                                                <IconButton
-                                                    color="secondary"
-                                                    onClick={() => handleInventoryUpdate(product)}
-                                                >
-                                                    <InventoryIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Xem lịch sử kho">
-                                                <IconButton
-                                                    color="info"
-                                                    onClick={() => window.location.href = `/inventory-history?product=${product.id}`}
-                                                >
-                                                    <UpdateIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                            {product.operation_type === "PURCHASE" && (
+                                                <>
+                                                    <Tooltip title="Cập nhật số lượng kho">
+                                                        <IconButton
+                                                            color="secondary"
+                                                            onClick={() => handleInventoryUpdate(product)}
+                                                        >
+                                                            <InventoryIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Xem lịch sử kho">
+                                                        <IconButton
+                                                            color="info"
+                                                            onClick={() => window.location.href = `/inventory-history?product=${product.id}`}
+                                                        >
+                                                            <UpdateIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
