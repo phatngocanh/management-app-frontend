@@ -440,3 +440,49 @@ export interface GetAllUnitsOfMeasureResponse {
 export interface GetOneUnitOfMeasureResponse {
     unit: UnitOfMeasureResponse;
 }
+
+// Inventory Receipt types
+export interface InventoryReceiptItemRequest {
+    product_id: number;
+    quantity: number;
+    unit_cost?: number;
+    notes?: string;
+}
+
+export interface CreateInventoryReceiptRequest {
+    user_id: number;
+    receipt_date?: string;
+    notes?: string;
+    items: InventoryReceiptItemRequest[];
+}
+
+export interface InventoryReceiptItemResponse {
+    id: number;
+    inventory_receipt_id: number;
+    product_id: number;
+    quantity: number;
+    unit_cost?: number;
+    notes?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface InventoryReceiptResponse {
+    id: number;
+    code: string;
+    user_id: number;
+    receipt_date: string;
+    notes?: string;
+    total_items: number;
+    created_at: string;
+    updated_at: string;
+    items?: InventoryReceiptItemResponse[];
+}
+
+export interface GetAllInventoryReceiptsResponse {
+    inventory_receipts: InventoryReceiptResponse[];
+}
+
+export interface GetOneInventoryReceiptResponse {
+    inventory_receipt: InventoryReceiptResponse;
+}

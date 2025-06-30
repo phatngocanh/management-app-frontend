@@ -33,6 +33,7 @@ export default function InventoryHistoryPage() {
     const [history, setHistory] = useState<InventoryHistoryResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<ProductResponse | null>(null);
 
     // Load products
     const loadProducts = useCallback(async () => {
@@ -78,6 +79,10 @@ export default function InventoryHistoryPage() {
             setError(null);
             const data = await productApi.getInventoryHistory(productId);
             setHistory(data);
+            
+            // Load product details to get unit information
+            const product = products.find(p => p.id === productId);
+            setSelectedProduct(product || null);
         } catch (err: any) {
             console.error("Error loading history:", err);
             
@@ -113,6 +118,47 @@ export default function InventoryHistoryPage() {
             hour: "2-digit",
             minute: "2-digit",
         }).format(new Date(dateString));
+    };
+
+    // Format number with thousand separators
+    const formatNumber = (number: number) => {
+        return new Intl.NumberFormat("vi-VN", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+            useGrouping: true,
+        }).format(number);
+    };
+
+    // Extract NK code from note and create link if found
+    const renderNoteWithLink = (note: string | null | undefined) => {
+        if (!note) return "-";
+        
+        // Check if note contains NK code pattern
+        const nkMatch = note.match(/NK\d{5}/);
+        if (nkMatch) {
+            const nkCode = nkMatch[0];
+            const beforeNK = note.substring(0, note.indexOf(nkCode));
+            const afterNK = note.substring(note.indexOf(nkCode) + nkCode.length);
+            
+            return (
+                <>
+                    {beforeNK}
+                    <Link 
+                        href={`/inventory-receipts/${nkCode}`}
+                        style={{ 
+                            color: '#1976d2', 
+                            textDecoration: 'underline',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        {nkCode}
+                    </Link>
+                    {afterNK}
+                </>
+            );
+        }
+        
+        return note;
     };
 
     if (loading) {
@@ -221,26 +267,18 @@ export default function InventoryHistoryPage() {
                                                         fontWeight: 'bold',
                                                     }}
                                                 >
-                                                    {item.quantity >= 0 ? '+' : ''}{item.quantity}
+                                                    {item.quantity >= 0 ? '+' : ''}{formatNumber(item.quantity)} {selectedProduct?.unit?.name || ''}
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>
                                                 <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                                    {item.final_quantity}
+                                                    {formatNumber(item.final_quantity)} {selectedProduct?.unit?.name || ''}
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>{item.importer_name}</TableCell>
                                             <TableCell>{formatDate(item.imported_at)}</TableCell>
                                             <TableCell>
-                                                {item.note || "-"}
-                                                {item.reference_id != null && (
-                                                    <>
-                                                        {item.note ? " " : ""}
-                                                        <a href={`/orders/${item.reference_id}`} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 4, color: '#1976d2' }}>
-                                                            (Xem đơn hàng)
-                                                        </a>
-                                                    </>
-                                                )}
+                                                {renderNoteWithLink(item.note)}
                                             </TableCell>
                                         </TableRow>
                                     ))

@@ -110,6 +110,14 @@ export default function MainLayout({
                     >
                         Lịch sử Kho
                     </Button>
+                    <Button 
+                        color="inherit" 
+                        component={Link} 
+                        href="/inventory-receipts"
+                        sx={{ mr: 1 }}
+                    >
+                        Phiếu Nhập Kho
+                    </Button>
                     <Badge badgeContent={pendingOrdersCount} color="warning" max={99}>
                         <Button 
                             color="inherit" 
