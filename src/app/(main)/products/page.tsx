@@ -79,6 +79,9 @@ export default function ProductsPage() {
         version: "",
     });
 
+    // Add a new state for the cost input as string
+    const [costInput, setCostInput] = useState<string>("");
+
     // Focus quantity input when inventory dialog opens
     useEffect(() => {
         if (openInventoryDialog) {
@@ -129,6 +132,18 @@ export default function ProductsPage() {
             loadData();
         }
     }, [selectedCategories]);
+
+    // When opening the dialog for edit, set costInput to formatted string
+    useEffect(() => {
+        if (openDialog) {
+            setCostInput(
+                formData.cost !== undefined && formData.cost !== null && !isNaN(formData.cost)
+                    ? formData.cost.toLocaleString("vi-VN", { minimumFractionDigits: 0, maximumFractionDigits: 3 })
+                    : ""
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [openDialog]);
 
     // Handle product form submission
     const handleSubmit = async () => {
@@ -260,6 +275,8 @@ export default function ProductsPage() {
         return new Intl.NumberFormat("vi-VN", {
             style: "currency",
             currency: "VND",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 3,
         }).format(price);
     };
 
@@ -475,10 +492,24 @@ export default function ProductsPage() {
                             fullWidth
                             label="Giá vốn (VND)"
                             type="text"
-                            value={formData.cost !== undefined && formData.cost !== null && !isNaN(formData.cost) ? formData.cost.toLocaleString("vi-VN") : ""}
+                            value={costInput}
                             onChange={(e) => {
-                                const raw = e.target.value.replace(/\D/g, "");
-                                setFormData({ ...formData, cost: raw ? Number(raw) : 0 });
+                                // Allow digits, dots, and commas
+                                let raw = e.target.value.replace(/[^\d.,]/g, "");
+                                // Only allow one decimal separator
+                                const parts = raw.split(/[.,]/);
+                                if (parts.length > 2) {
+                                    raw = parts[0] + "." + parts.slice(1).join("");
+                                } else {
+                                    raw = raw.replace(",", ".");
+                                }
+                                setCostInput(raw);
+                            }}
+                            onBlur={() => {
+                                const normalized = costInput.replace(/,/g, ".");
+                                const num = parseFloat(normalized);
+                                setFormData({ ...formData, cost: isNaN(num) ? 0 : num });
+                                setCostInput(isNaN(num) ? "" : num.toLocaleString("vi-VN", { minimumFractionDigits: 0, maximumFractionDigits: 3 }));
                             }}
                             margin="normal"
                             required

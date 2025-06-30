@@ -126,7 +126,7 @@ export default function CreateInventoryReceiptPage() {
             style: "currency",
             currency: "VND",
             minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
+            maximumFractionDigits: 3,
         }).format(price);
     };
 

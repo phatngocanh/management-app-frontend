@@ -78,8 +78,11 @@ export interface UnitOfMeasureResponse {
 }
 
 export interface ProductBOMInfo {
-    total_components: number;
-    components: BomComponentResponse[];
+    id: number;
+    name: string;
+    cost: number;
+    unit_name: string;
+    category_code: string;
 }
 
 export interface ProductBOMUsage {
@@ -153,7 +156,7 @@ export interface ProductBomInfo {
     id: number;
     name: string;
     cost: number;
-    unit_code: string;
+    unit_name: string;
     category_code: string;
 }
 

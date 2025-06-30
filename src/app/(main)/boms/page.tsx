@@ -69,7 +69,7 @@ export default function BOMPage() {
             
             const [bomsData, productsData] = await Promise.all([
                 bomApi.getAll(),
-                productApi.getAll()
+                productApi.getAll() // Only load products with category IDs 7 and 8
             ]);
             
             setBoms(bomsData);
@@ -303,7 +303,7 @@ export default function BOMPage() {
                             </TableHead>
                             <TableBody>
                                 {boms.map((bom) => {
-                                    const parentProduct = getProductById(bom.parent_product_id);
+                                    const parentProduct = bom.parent_product || getProductById(bom.parent_product_id);
                                     const isExpanded = expandedBoms.has(bom.parent_product_id);
                                     
                                     return (
@@ -322,11 +322,6 @@ export default function BOMPage() {
                                                         <Typography variant="body2" fontWeight="medium">
                                                             {parentProduct?.name || `Product #${bom.parent_product_id}`}
                                                         </Typography>
-                                                        {parentProduct?.description && (
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                {parentProduct.description}
-                                                            </Typography>
-                                                        )}
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell>{bom.total_components}</TableCell>
@@ -361,6 +356,7 @@ export default function BOMPage() {
                                                             <Table size="small">
                                                                 <TableHead>
                                                                     <TableRow>
+                                                                        <TableCell colSpan={2} />
                                                                         <TableCell>Nguyên liệu</TableCell>
                                                                         <TableCell>Số lượng</TableCell>
                                                                         <TableCell>Giá vốn</TableCell>
@@ -369,17 +365,17 @@ export default function BOMPage() {
                                                                 </TableHead>
                                                                 <TableBody>
                                                                     {bom.components.map((component) => {
-                                                                        const componentProduct = getProductById(component.component_product_id);
+                                                                        const componentProduct = component.component_product;
                                                                         const totalCost = componentProduct ? component.quantity * componentProduct.cost : 0;
                                                                         
                                                                         return (
                                                                             <TableRow key={component.id}>
+                                                                                <TableCell colSpan={2} />
                                                                                 <TableCell>
                                                                                     {componentProduct?.name || `Product #${component.component_product_id}`}
                                                                                 </TableCell>
                                                                                 <TableCell>
-                                                                                    {component.quantity}
-                                                                                    {componentProduct?.unit?.code && ` ${componentProduct.unit.code}`}
+                                                                                    {component.quantity}{componentProduct?.unit_name ? ` ${componentProduct.unit_name}` : ''}
                                                                                 </TableCell>
                                                                                 <TableCell>
                                                                                     {componentProduct ? formatPrice(componentProduct.cost) : "N/A"}
