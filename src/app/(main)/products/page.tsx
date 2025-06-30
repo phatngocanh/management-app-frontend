@@ -263,6 +263,13 @@ export default function ProductsPage() {
         }).format(price);
     };
 
+    const formatNumber = (number: number) => {
+        return new Intl.NumberFormat("vi-VN", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+        }).format(number);
+    };
+
     if (loading) {
         return (
             <Box sx={{ p: 3 }}>
@@ -396,7 +403,7 @@ export default function ProductsPage() {
                                             {product.operation_type === "PURCHASE" ? (
                                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                                     <Typography variant="body2">
-                                                        {product.inventory ? product.inventory.quantity : "N/A"}
+                                                        {product.inventory ? formatNumber(product.inventory.quantity) : "N/A"}
                                                     </Typography>
                                                     {product.unit && product.inventory && (
                                                         <Typography variant="caption" color="text.secondary">
