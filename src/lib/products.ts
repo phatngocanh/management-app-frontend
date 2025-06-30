@@ -32,11 +32,14 @@ export const productApi = {
     },
 
     // Get all products
-    getAll: async (categoryIds?: number[]): Promise<ProductResponse[]> => {
+    getAll: async (categoryIds?: number[], operationType?: string): Promise<ProductResponse[]> => {
         let url = "/products";
         if (categoryIds && categoryIds.length > 0) {
             const categoryParam = categoryIds.join(",");
             url += `?category=${categoryParam}`;
+        }
+        if (operationType) {
+            url += `?operationType=${operationType}`;
         }
         const response = await api.get<ApiResponse<GetAllProductsResponse>>(url);
         return response.data.data.products;

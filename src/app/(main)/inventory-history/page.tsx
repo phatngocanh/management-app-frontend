@@ -39,7 +39,7 @@ export default function InventoryHistoryPage() {
         try {
             setLoading(true);
             setError(null);
-            const data = await productApi.getAll();
+            const data = await productApi.getAll(undefined, "PURCHASE");
             setProducts(data);
             
             // Check if there's a product parameter in the URL
