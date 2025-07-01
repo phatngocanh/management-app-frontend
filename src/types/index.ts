@@ -104,6 +104,7 @@ export interface ProductResponse {
     inventory?: InventoryInfo;
     bom?: ProductBOMInfo;
     used_in_boms?: ProductBOMUsage[];
+    images?: ProductImageResponse[]; // Danh sách hình ảnh sản phẩm
 }
 
 export interface GetAllProductsResponse {
@@ -488,4 +489,12 @@ export interface GetAllInventoryReceiptsResponse {
 
 export interface GetOneInventoryReceiptResponse {
     inventory_receipt: InventoryReceiptResponse;
+}
+
+// Product Image types
+export interface ProductImageResponse {
+    id: number;
+    product_id: number;
+    image_url: string;
+    image_key: string;
 }

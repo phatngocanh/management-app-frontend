@@ -32,15 +32,20 @@ export const productApi = {
     },
 
     // Get all products
-    getAll: async (categoryIds?: number[], operationType?: string): Promise<ProductResponse[]> => {
-        let url = "/products";
+    getAll: async (categoryIds?: number[], operationType?: string, noBom?: boolean): Promise<ProductResponse[]> => {
+        const params = new URLSearchParams();
+        
         if (categoryIds && categoryIds.length > 0) {
-            const categoryParam = categoryIds.join(",");
-            url += `?category=${categoryParam}`;
+            params.append("category", categoryIds.join(","));
         }
         if (operationType) {
-            url += `?operationType=${operationType}`;
+            params.append("operationType", operationType);
         }
+        if (noBom) {
+            params.append("noBom", "true");
+        }
+        
+        const url = `/products${params.toString() ? `?${params.toString()}` : ""}`;
         const response = await api.get<ApiResponse<GetAllProductsResponse>>(url);
         return response.data.data.products;
     },
@@ -67,6 +72,56 @@ export const productApi = {
     getInventoryHistory: async (productId: number): Promise<InventoryHistoryResponse[]> => {
         const response = await api.get<ApiResponse<GetAllInventoryHistoriesResponse>>(`/products/${productId}/inventories/histories`);
         return response.data.data.inventory_histories;
+    },
+};
+
+// Product Images API functions
+export const productImagesApi = {
+    // Generate signed upload URL
+    generateSignedUploadURL: async (productId: number, fileName: string, contentType: string) => {
+        const response = await api.post<ApiResponse<any>>(
+            `/products/${productId}/images/upload-url?fileName=${encodeURIComponent(fileName)}&contentType=${encodeURIComponent(contentType)}`
+        );
+        return response.data.data;
+    },
+
+    // Upload an image for a product using signed URL
+    uploadImage: async (productId: number, file: File) => {
+        // Step 1: Generate signed upload URL
+        const signedUrlResponse = await productImagesApi.generateSignedUploadURL(
+            productId,
+            file.name,
+            file.type
+        );
+
+        // Step 2: Upload file directly to S3 using the signed URL
+        const uploadResponse = await fetch(signedUrlResponse.signed_url, {
+            method: 'PUT',
+            body: file,
+            headers: {
+                'Content-Type': file.type,
+            },
+        });
+
+        if (!uploadResponse.ok) {
+            throw new Error(`Failed to upload file to S3: ${uploadResponse.statusText}`);
+        }
+
+        // Step 3: Return the response with the uploaded image info
+        return {
+            productImage: {
+                id: signedUrlResponse.image_id,
+                product_id: productId,
+                image_url: signedUrlResponse.signed_url,
+                image_key: signedUrlResponse.image_key,
+            },
+        };
+    },
+
+    // Delete an image
+    deleteImage: async (productId: number, imageId: number) => {
+        const response = await api.delete(`/products/${productId}/images/${imageId}`);
+        return response.data;
     },
 };
 

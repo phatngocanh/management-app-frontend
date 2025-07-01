@@ -1,16 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import ImageUpload from "@/components/ImageUpload";
 import LoadingButton from "@/components/LoadingButton";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import { categoryApi } from "@/lib/categories";
 import { extractErrorMessage } from "@/lib/error-utils";
 import { inventoryApi } from "@/lib/inventory";
-import { productApi } from "@/lib/products";
+import { productApi, productImagesApi } from "@/lib/products";
 import { unitApi } from "@/lib/units";
 import { ProductCategoryResponse, ProductResponse, UnitOfMeasureResponse, UpdateInventoryQuantityRequest,UpdateProductRequest } from "@/types";
-import { Add as AddIcon, Edit as EditIcon, Inventory as InventoryIcon, Update as UpdateIcon } from "@mui/icons-material";
+import { Add as AddIcon, Edit as EditIcon, Inventory as InventoryIcon, Update as UpdateIcon, Image as ImageIcon } from "@mui/icons-material";
 import {
     Alert,
     Autocomplete,
@@ -44,12 +46,16 @@ export default function ProductsPage() {
     const [units, setUnits] = useState<UnitOfMeasureResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [imageOperationLoading, setImageOperationLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [openInventoryDialog, setOpenInventoryDialog] = useState(false);
+    const [openImageDialog, setOpenImageDialog] = useState(false);
     const [editingProduct, setEditingProduct] = useState<ProductResponse | null>(null);
     const [selectedProductForInventory, setSelectedProductForInventory] = useState<ProductResponse | null>(null);
+    const [selectedProductForImages, setSelectedProductForImages] = useState<ProductResponse | null>(null);
     const [selectedCategories, setSelectedCategories] = useState<ProductCategoryResponse[]>([]);
+
 
     // Form data for product
     const [formData, setFormData] = useState<{
@@ -268,8 +274,66 @@ export default function ProductsPage() {
         setOpenInventoryDialog(false);
         setSelectedProductForInventory(null);
         setInventoryFormData({ quantity: "", note: "", version: "" });
+    };
+
+    // Handle image upload
+    const handleImageUpload = async (file: File) => {
+        if (!selectedProductForImages) return;
+
+        try {
+            setImageOperationLoading(true);
+            setError(null);
+            await productImagesApi.uploadImage(selectedProductForImages.id, file);
+            // Reload the products to get updated images
+            await loadData();
+            // Update the selected product with fresh data
+            const updatedProduct = await productApi.getOne(selectedProductForImages.id);
+            setSelectedProductForImages(updatedProduct);
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            setError(extractErrorMessage(error as any, "Không thể tải ảnh lên. Vui lòng thử lại."));
+            throw error;
+        } finally {
+            setImageOperationLoading(false);
+        }
+    };
+
+    // Handle image delete
+    const handleImageDelete = async (imageId: number) => {
+        if (!selectedProductForImages) return;
+
+        try {
+            setImageOperationLoading(true);
+            setError(null);
+            await productImagesApi.deleteImage(selectedProductForImages.id, imageId);
+            // Reload the products to get updated images
+            await loadData();
+            // Update the selected product with fresh data
+            const updatedProduct = await productApi.getOne(selectedProductForImages.id);
+            setSelectedProductForImages(updatedProduct);
+        } catch (error) {
+            console.error("Error deleting image:", error);
+            setError(extractErrorMessage(error as any, "Không thể xóa ảnh. Vui lòng thử lại."));
+            throw error;
+        } finally {
+            setImageOperationLoading(false);
+        }
+    };
+
+    // Handle image dialog
+    const handleImageManagement = (product: ProductResponse) => {
+        setSelectedProductForImages(product);
+        setError(null);
+        setOpenImageDialog(true);
+    };
+
+    const handleCloseImageDialog = () => {
+        setOpenImageDialog(false);
+        setSelectedProductForImages(null);
         setError(null);
     };
+
+
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("vi-VN", {
@@ -386,6 +450,7 @@ export default function ProductsPage() {
                                     <TableCell>Danh mục</TableCell>
                                     <TableCell>Đơn vị</TableCell>
                                     <TableCell>Số lượng kho</TableCell>
+                                    <TableCell>Hình ảnh</TableCell>
                                     <TableCell>Thao tác</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -431,6 +496,61 @@ export default function ProductsPage() {
                                             ) : (
                                                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
                                                     Không áp dụng
+                                                </Typography>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {product.operation_type === "MANUFACTURING" || product.operation_type === "PACKAGING" ? (
+                                                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                                    {/* Image thumbnail */}
+                                                    <Box sx={{ 
+                                                        width: 60, 
+                                                        height: 60, 
+                                                        borderRadius: 1, 
+                                                        overflow: "hidden",
+                                                        border: "1px solid #e0e0e0",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        bgcolor: "grey.50"
+                                                    }}>
+                                                        {product.images && product.images.length > 0 ? (
+                                                            <Image
+                                                                src={product.images[0].image_url}
+                                                                alt={`${product.name} - Ảnh 1`}
+                                                                width={60}
+                                                                height={60}
+                                                                style={{
+                                                                    width: "100%",
+                                                                    height: "100%",
+                                                                    objectFit: "cover",
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <ImageIcon sx={{ color: "grey.400", fontSize: 24 }} />
+                                                        )}
+                                                    </Box>
+                                                    
+                                                    {/* Image count and manage button */}
+                                                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                                                        <Typography variant="body2">
+                                                            {product.images?.length || 0} ảnh
+                                                        </Typography>
+                                                        <Tooltip title="Quản lý hình ảnh">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleImageManagement(product)}
+                                                                color="primary"
+                                                                sx={{ alignSelf: "flex-start" }}
+                                                            >
+                                                                <ImageIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Box>
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Không khả dụng
                                                 </Typography>
                                             )}
                                         </TableCell>
@@ -657,6 +777,58 @@ export default function ProductsPage() {
                     >
                         Cập nhật số lượng
                     </LoadingButton>
+                </DialogActions>
+            </Dialog>
+
+            {/* Image Management Dialog */}
+            <Dialog open={openImageDialog} onClose={handleCloseImageDialog} maxWidth="md" fullWidth>
+                <DialogTitle>
+                    Quản lý hình ảnh sản phẩm
+                </DialogTitle>
+                <DialogContent>
+                    <Box sx={{ pt: 2 }}>
+                        {error && (
+                            <Alert severity="error" sx={{ mb: 2 }}>
+                                {error}
+                            </Alert>
+                        )}
+                        {selectedProductForImages && (
+                            <>
+                                <Box sx={{ mb: 3, p: 2, bgcolor: "grey.100", borderRadius: 1 }}>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Sản phẩm
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="medium">
+                                        {selectedProductForImages.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {selectedProductForImages.description}
+                                    </Typography>
+                                </Box>
+                                
+                                {selectedProductForImages.operation_type === "PURCHASE" ? (
+                                    <Alert severity="warning" sx={{ mb: 2 }}>
+                                        Không thể tải ảnh cho sản phẩm loại &quot;Mua nguyên liệu&quot;
+                                    </Alert>
+                                ) : (
+                                    <ImageUpload
+                                        onUpload={handleImageUpload}
+                                        onDelete={handleImageDelete}
+                                        images={selectedProductForImages.images?.map(img => ({
+                                            id: img.id,
+                                            image_url: img.image_url
+                                        })) || []}
+                                        loading={imageOperationLoading}
+                                    />
+                                )}
+                            </>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseImageDialog} disabled={imageOperationLoading}>
+                        Đóng
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Box>
