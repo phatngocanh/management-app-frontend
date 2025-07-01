@@ -194,7 +194,7 @@ export default function CustomersPage() {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>ID</TableCell>
+                                    <TableCell>Mã KH</TableCell>
                                     <TableCell>Tên khách hàng</TableCell>
                                     <TableCell>Số điện thoại</TableCell>
                                     <TableCell>Địa chỉ</TableCell>
@@ -204,7 +204,7 @@ export default function CustomersPage() {
                             <TableBody>
                                 {customers.map((customer) => (
                                     <TableRow key={customer.id}>
-                                        <TableCell>{customer.id}</TableCell>
+                                        <TableCell>{customer.code}</TableCell>
                                         <TableCell>{customer.name}</TableCell>
                                         <TableCell>{customer.phone}</TableCell>
                                         <TableCell>{customer.address}</TableCell>

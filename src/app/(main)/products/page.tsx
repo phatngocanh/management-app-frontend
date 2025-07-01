@@ -443,7 +443,7 @@ export default function ProductsPage() {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>ID</TableCell>
+                                    <TableCell>Mã SP</TableCell>
                                     <TableCell>Tên sản phẩm</TableCell>
                                     <TableCell>Giá vốn</TableCell>
                                     <TableCell>Loại sản phẩm</TableCell>
@@ -457,7 +457,7 @@ export default function ProductsPage() {
                             <TableBody>
                                 {products.map((product) => (
                                     <TableRow key={product.id}>
-                                        <TableCell>{product.id}</TableCell>
+                                        <TableCell>{product.code}</TableCell>
                                         <TableCell>
                                             <Box>
                                                 <Typography variant="body2" fontWeight="medium">

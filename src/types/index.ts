@@ -93,6 +93,7 @@ export interface ProductBOMUsage {
 
 export interface ProductResponse {
     id: number;
+    code: string;            // Mã sản phẩm (SP00001)
     name: string;
     cost: number;
     category_id?: number;
@@ -388,6 +389,7 @@ export interface UpdateCustomerRequest {
 
 export interface CustomerResponse {
     id: number;
+    code: string;    // Mã khách hàng (KH00001)
     name: string;
     phone: string;
     address: string;
