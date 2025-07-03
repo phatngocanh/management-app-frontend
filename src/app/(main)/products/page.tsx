@@ -500,59 +500,53 @@ export default function ProductsPage() {
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {product.operation_type === "MANUFACTURING" || product.operation_type === "PACKAGING" ? (
-                                                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                                                    {/* Image thumbnail */}
-                                                    <Box sx={{ 
-                                                        width: 60, 
-                                                        height: 60, 
-                                                        borderRadius: 1, 
-                                                        overflow: "hidden",
-                                                        border: "1px solid #e0e0e0",
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        justifyContent: "center",
-                                                        bgcolor: "grey.50"
-                                                    }}>
-                                                        {product.images && product.images.length > 0 ? (
-                                                            <Image
-                                                                src={product.images[0].image_url}
-                                                                alt={`${product.name} - Ảnh 1`}
-                                                                width={60}
-                                                                height={60}
-                                                                style={{
-                                                                    width: "100%",
-                                                                    height: "100%",
-                                                                    objectFit: "cover",
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <ImageIcon sx={{ color: "grey.400", fontSize: 24 }} />
-                                                        )}
-                                                    </Box>
-                                                    
-                                                    {/* Image count and manage button */}
-                                                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                                                        <Typography variant="body2">
-                                                            {product.images?.length || 0} ảnh
-                                                        </Typography>
-                                                        <Tooltip title="Quản lý hình ảnh">
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={() => handleImageManagement(product)}
-                                                                color="primary"
-                                                                sx={{ alignSelf: "flex-start" }}
-                                                            >
-                                                                <ImageIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </Box>
+                                            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                                                {/* Image thumbnail */}
+                                                <Box sx={{ 
+                                                    width: 60, 
+                                                    height: 60, 
+                                                    borderRadius: 1, 
+                                                    overflow: "hidden",
+                                                    border: "1px solid #e0e0e0",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    bgcolor: "grey.50"
+                                                }}>
+                                                    {product.images && product.images.length > 0 ? (
+                                                        <Image
+                                                            src={product.images[0].image_url}
+                                                            alt={`${product.name} - Ảnh 1`}
+                                                            width={60}
+                                                            height={60}
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "100%",
+                                                                objectFit: "cover",
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <ImageIcon sx={{ color: "grey.400", fontSize: 24 }} />
+                                                    )}
                                                 </Box>
-                                            ) : (
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Không khả dụng
-                                                </Typography>
-                                            )}
+                                                
+                                                {/* Image count and manage button */}
+                                                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                                                    <Typography variant="body2">
+                                                        {product.images?.length || 0} ảnh
+                                                    </Typography>
+                                                    <Tooltip title="Quản lý hình ảnh">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleImageManagement(product)}
+                                                            color="primary"
+                                                            sx={{ alignSelf: "flex-start" }}
+                                                        >
+                                                            <ImageIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Box>
+                                            </Box>
                                         </TableCell>
                                         <TableCell>
                                             <Tooltip title="Chỉnh sửa Sản phẩm">
@@ -806,21 +800,15 @@ export default function ProductsPage() {
                                     </Typography>
                                 </Box>
                                 
-                                {selectedProductForImages.operation_type === "PURCHASE" ? (
-                                    <Alert severity="warning" sx={{ mb: 2 }}>
-                                        Không thể tải ảnh cho sản phẩm loại &quot;Mua nguyên liệu&quot;
-                                    </Alert>
-                                ) : (
-                                    <ImageUpload
-                                        onUpload={handleImageUpload}
-                                        onDelete={handleImageDelete}
-                                        images={selectedProductForImages.images?.map(img => ({
-                                            id: img.id,
-                                            image_url: img.image_url
-                                        })) || []}
-                                        loading={imageOperationLoading}
-                                    />
-                                )}
+                                <ImageUpload
+                                    onUpload={handleImageUpload}
+                                    onDelete={handleImageDelete}
+                                    images={selectedProductForImages.images?.map(img => ({
+                                        id: img.id,
+                                        image_url: img.image_url
+                                    })) || []}
+                                    loading={imageOperationLoading}
+                                />
                             </>
                         )}
                     </Box>
