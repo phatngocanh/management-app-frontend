@@ -165,13 +165,13 @@ export interface ProductBomInfo {
 // Order types
 export interface Order {
     id: number;
+    code: string;
     customer_id: number;
     order_date: string;
-    delivery_status: string;
-    debt_status: string;
-    status_transitioned_at?: string;
+    note?: string;
     additional_cost?: number;
     additional_cost_note?: string;
+    tax_percent?: number;
     order_items: OrderItem[];
 }
 
@@ -181,55 +181,55 @@ export interface OrderItem {
     product_id: number;
     quantity: number;
     selling_price: number;
-    discount: number;
+    discount_percent?: number;
     final_amount?: number;
 }
 
 export interface CreateOrderRequest {
     customer_id: number;
     order_date: string;
-    delivery_status: string;
-    debt_status?: string;
-    status_transitioned_at?: string;
+    note?: string;
     additional_cost?: number;
     additional_cost_note?: string;
-    order_items: OrderItemRequest[];
+    tax_percent?: number;
+    delivery_status?: string;
+    items: OrderItemRequest[];
 }
 
 export interface OrderItemRequest {
     product_id: number;
     quantity: number;
     selling_price: number;
-    discount?: number;
-    final_amount?: number;
-    version: string; // For optimistic locking
-    export_from: string; // INVENTORY or EXTERNAL, required
+    original_price: number;
+    discount_percent?: number;
 }
 
 export interface UpdateOrderRequest {
     id: number;
     customer_id?: number;
     order_date?: string;
-    delivery_status?: string;
-    debt_status?: string;
-    status_transitioned_at?: string;
+    note?: string;
     additional_cost?: number;
     additional_cost_note?: string;
+    tax_percent?: number;
+    delivery_status?: string;
 }
 
 export interface OrderResponse {
     id: number;
+    code: string;
     order_date: string;
-    delivery_status: string;
-    debt_status: string;
-    status_transitioned_at?: string;
+    note?: string;
     additional_cost?: number;
     additional_cost_note?: string;
-    order_items: OrderItemResponse[];
+    tax_percent?: number;
+    delivery_status?: string;
     customer: CustomerResponse;
+    order_items?: OrderItemResponse[];
     images?: OrderImage[];
     total_amount?: number;
     product_count?: number;
+    total_sales_revenue?: number;
     // Profit/Loss fields for total order
     total_profit_loss?: number;
     total_profit_loss_percentage?: number;
@@ -242,9 +242,8 @@ export interface OrderItemResponse {
     product_name?: string;
     quantity: number;
     selling_price: number;
-    discount: number;
+    discount_percent?: number;
     final_amount?: number;
-    export_from: string;
     // Profit/Loss fields
     original_price?: number;
     profit_loss?: number;

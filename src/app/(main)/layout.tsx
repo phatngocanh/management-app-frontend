@@ -122,10 +122,10 @@ export default function MainLayout({
                         <Button 
                             color="inherit" 
                             component={Link} 
-                            href="/orders"
+                            href="/orders/create"
                             sx={{ mr: 1 }}
                         >
-                            Đơn hàng
+                            Tạo Đơn hàng
                         </Button>
                     </Badge>
                     

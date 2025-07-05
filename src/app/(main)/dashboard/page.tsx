@@ -328,9 +328,9 @@ export default function DashboardPage() {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                                 Tạo và quản lý đơn hàng. Hiện có {stats.total_orders} đơn hàng, trong đó {stats.pending_orders} đơn đang chờ xử lý.
                             </Typography>
-                            <Link href="/orders" style={{ textDecoration: "none" }}>
+                            <Link href="/orders/create" style={{ textDecoration: "none" }}>
                                 <Button variant="contained" color="success" fullWidth>
-                                    Quản lý Đơn hàng
+                                    Tạo Đơn hàng
                                 </Button>
                             </Link>
                         </CardContent>
